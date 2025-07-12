@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client CRM Lite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        body {
+            font-family: "Inter", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-w-4xl border border-gray-200">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">
+            <i class="fas fa-chart-line text-indigo-500 mr-3"></i>Client CRM Lite
+        </h1>
+
+        <!-- Add New Contact Form -->
+        <div class="mb-8 p-6 bg-blue-50 rounded-lg shadow-inner border border-blue-200">
+            <h2 class="text-2xl font-semibold text-blue-800 mb-5 flex items-center">
+                <i class="fas fa-plus-circle mr-2 text-blue-600"></i>Add New Contact
+            </h2>
+            <form id="contactForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Contact Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" id="phone" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                    <label for="lastConversation" class="block text-sm font-medium text-gray-700 mb-1">Last Conversation Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="lastConversation" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                    <label for="dealValue" class="block text-sm font-medium text-gray-700 mb-1">Deal Value ($)</label>
+                    <input type="number" id="dealValue" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                    <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
+                    <input type="text" id="tags" placeholder="e.g., Lead, VIP, Hot" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea id="notes" rows="3" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200"></textarea>
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 ease-in-out flex items-center">
+                        <i class="fas fa-save mr-2"></i>Add Contact
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filters and Sorting -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg shadow-inner border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 class="text-xl font-semibold text-gray-700 flex items-center">
+                <i class="fas fa-filter mr-2 text-gray-600"></i>Filter & Sort
+            </h2>
+            <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                <select id="sortBy" class="p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white">
+                    <option value="name">Sort by Name</option>
+                    <option value="lastConversation">Sort by Last Conversation</option>
+                    <option value="dealValue">Sort by Deal Value</option>
+                </select>
+                <input type="text" id="search" placeholder="Search by name or tag..." class="p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 w-full md:w-auto">
+            </div>
+        </div>
+
+        <!-- Contact List -->
+        <div id="contactList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Contact cards will be rendered here -->
+            <p class="text-center text-gray-500 md:col-span-2 lg:col-span-3" id="noContactsMessage">No contacts yet. Add one above!</p>
+        </div>
+
+        <!-- Reminder Modal -->
+        <div id="reminderModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="reminderModalContent">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-indigo-700 flex items-center">
+                        <i class="fas fa-bell mr-2 text-indigo-500"></i>Upcoming Follow-ups
+                    </h3>
+                    <button id="closeReminderModal" class="text-gray-500 hover:text-gray-700 text-3xl">&times;</button>
+                </div>
+                <div id="reminderList" class="max-h-80 overflow-y-auto pr-2">
+                    <!-- Reminders will be listed here -->
+                </div>
+                <div class="mt-6 text-right">
+                    <button id="markAllRemindersDone" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200">
+                        Mark All Done
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Box for alerts/confirmations -->
+        <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm transform transition-all duration-300 scale-95 opacity-0" id="messageBoxContent">
+                <h3 id="messageBoxTitle" class="text-xl font-bold mb-4 text-gray-800"></h3>
+                <p id="messageBoxText" class="mb-6 text-gray-700"></p>
+                <div class="flex justify-end gap-3">
+                    <button id="messageBoxConfirm" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200 hidden">Confirm</button>
+                    <button id="messageBoxCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200 hidden">Cancel</button>
+                    <button id="messageBoxOK" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200">OK</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const contactForm = document.getElementById('contactForm');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const lastConversationInput = document.getElementById('lastConversation');
+        const dealValueInput = document.getElementById('dealValue');
+        const tagsInput = document.getElementById('tags');
+        const notesInput = document.getElementById('notes');
+        const contactListDiv = document.getElementById('contactList');
+        const sortBySelect = document.getElementById('sortBy');
+        const searchInput = document.getElementById('search');
+        const noContactsMessage = document.getElementById('noContactsMessage');
+
+        // Reminder Modal Elements
+        const reminderModal = document.getElementById('reminderModal');
+        const reminderModalContent = document.getElementById('reminderModalContent');
+        const closeReminderModalBtn = document.getElementById('closeReminderModal');
+        const reminderListDiv = document.getElementById('reminderList');
+        const markAllRemindersDoneBtn = document.getElementById('markAllRemindersDone');
+
+        // Message Box Elements
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxTitle = document.getElementById('messageBoxTitle');
+        const messageBoxText = document.getElementById('messageBoxText');
+        const messageBoxConfirmBtn = document.getElementById('messageBoxConfirm');
+        const messageBoxCancelBtn = document.getElementById('messageBoxCancel');
+        const messageBoxOKBtn = document.getElementById('messageBoxOK');
+
+        // Array to store contacts
+        let contacts = [];
+
+        // Function to show a custom message box (replaces alert/confirm)
+        function showMessageBox(title, message, type = 'alert') {
+            return new Promise((resolve) => {
+                messageBoxTitle.textContent = title;
+                messageBoxText.textContent = message;
+
+                // Reset button visibility
+                messageBoxConfirmBtn.classList.add('hidden');
+                messageBoxCancelBtn.classList.add('hidden');
+                messageBoxOKBtn.classList.add('hidden');
+
+                if (type === 'confirm') {
+                    messageBoxConfirmBtn.classList.remove('hidden');
+                    messageBoxCancelBtn.classList.remove('hidden');
+                    messageBoxConfirmBtn.onclick = () => {
+                        messageBox.classList.add('hidden');
+                        messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                        messageBoxContent.classList.add('scale-95', 'opacity-0');
+                        resolve(true);
+                    };
+                    messageBoxCancelBtn.onclick = () => {
+                        messageBox.classList.add('hidden');
+                        messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                        messageBoxContent.classList.add('scale-95', 'opacity-0');
+                        resolve(false);
+                    };
+                } else { // 'alert' type
+                    messageBoxOKBtn.classList.remove('hidden');
+                    messageBoxOKBtn.onclick = () => {
+                        messageBox.classList.add('hidden');
+                        messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                        messageBoxContent.classList.add('scale-95', 'opacity-0');
+                        resolve(true);
+                    };
+                }
+
+                messageBox.classList.remove('hidden');
+                setTimeout(() => {
+                    messageBoxContent.classList.remove('scale-95', 'opacity-0');
+                    messageBoxContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            });
+        }
+
+        // Load contacts from Local Storage
+        function loadContacts() {
+            const storedContacts = localStorage.getItem('crmContacts');
+            if (storedContacts) {
+                contacts = JSON.parse(storedContacts);
+                // Ensure dates are parsed correctly
+                contacts.forEach(contact => {
+                    if (contact.lastConversation) contact.lastConversation = new Date(contact.lastConversation);
+                    if (contact.nextFollowUp) contact.nextFollowUp = new Date(contact.nextFollowUp);
+                });
+            }
+        }
+
+        // Save contacts to Local Storage
+        function saveContacts() {
+            localStorage.setItem('crmContacts', JSON.stringify(contacts));
+        }
+
+        // Function to render contact cards
+        function renderContacts() {
+            contactListDiv.innerHTML = ''; // Clear existing contacts
+            if (contacts.length === 0) {
+                noContactsMessage.classList.remove('hidden');
+                return;
+            } else {
+                noContactsMessage.classList.add('hidden');
+            }
+
+            // Apply sorting and filtering before rendering
+            let displayedContacts = [...contacts];
+
+            // Filter by search input
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (searchTerm) {
+                displayedContacts = displayedContacts.filter(contact =>
+                    contact.name.toLowerCase().includes(searchTerm) ||
+                    contact.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                    contact.notes.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Sort contacts
+            const sortBy = sortBySelect.value;
+            if (sortBy === 'name') {
+                displayedContacts.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortBy === 'lastConversation') {
+                displayedContacts.sort((a, b) => b.lastConversation.getTime() - a.lastConversation.getTime());
+            } else if (sortBy === 'dealValue') {
+                displayedContacts.sort((a, b) => b.dealValue - a.dealValue);
+            }
+
+            displayedContacts.forEach(contact => {
+                const contactCard = document.createElement('div');
+                contactCard.id = `contact-${contact.id}`;
+                contactCard.className = 'bg-white rounded-lg shadow-lg p-5 border border-gray-200 flex flex-col justify-between transform hover:scale-105 transition duration-300 ease-in-out';
+
+                const lastConvDate = contact.lastConversation ? contact.lastConversation.toLocaleDateString() : 'N/A';
+                const nextFollowUpDate = contact.nextFollowUp ? contact.nextFollowUp.toLocaleDateString() : 'Not Set';
+                const dealValueFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(contact.dealValue);
+
+                contactCard.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${contact.name}</h3>
+                        <p class="text-gray-600 text-sm mb-1"><i class="fas fa-envelope mr-2 text-blue-500"></i>${contact.email || 'N/A'}</p>
+                        <p class="text-gray-600 text-sm mb-3"><i class="fas fa-phone mr-2 text-green-500"></i>${contact.phone || 'N/A'}</p>
+                        <p class="text-gray-700 text-sm mb-1"><i class="fas fa-calendar-alt mr-2 text-purple-500"></i>Last Conversation: <span class="font-medium">${lastConvDate}</span></p>
+                        <p class="text-gray-700 text-sm mb-3"><i class="fas fa-dollar-sign mr-2 text-yellow-500"></i>Deal Value: <span class="font-medium">${dealValueFormatted}</span></p>
+                        <div class="mb-3">
+                            <span class="text-gray-700 text-sm"><i class="fas fa-tags mr-2 text-pink-500"></i>Tags:</span>
+                            ${contact.tags.map(tag => `<span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded-full mr-1 mb-1">${tag}</span>`).join('')}
+                            ${contact.tags.length === 0 ? '<span class="text-xs text-gray-500">None</span>' : ''}
+                        </div>
+                        <p class="text-gray-700 text-sm mb-3"><i class="fas fa-clipboard-list mr-2 text-teal-500"></i>Notes: <span class="text-gray-600">${contact.notes || 'No notes.'}</span></p>
+                        <p class="text-gray-700 text-sm mb-4"><i class="fas fa-clock mr-2 text-red-500"></i>Next Follow-up: <span class="font-medium">${nextFollowUpDate}</span></p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <button class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200 flex-grow" data-id="${contact.id}">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                        <button class="followup-btn bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200 flex-grow" data-id="${contact.id}">
+                            <i class="fas fa-calendar-plus mr-1"></i>Set Follow-up
+                        </button>
+                        <button class="delete-btn bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-4 rounded-md shadow-md transform hover:scale-105 transition duration-200 flex-grow" data-id="${contact.id}">
+                            <i class="fas fa-trash-alt mr-1"></i>Delete
+                        </button>
+                    </div>
+                `;
+                contactListDiv.appendChild(contactCard);
+            });
+
+            addEventListenersToContactCards();
+        }
+
+        // Add event listeners to dynamically created buttons
+        function addEventListenersToContactCards() {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.onclick = (e) => editContact(e.target.dataset.id);
+            });
+            document.querySelectorAll('.followup-btn').forEach(button => {
+                button.onclick = (e) => setFollowUp(e.target.dataset.id);
+            });
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.onclick = (e) => deleteContact(e.target.dataset.id);
+            });
+        }
+
+        // Handle form submission
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newContact = {
+                id: Date.now().toString(), // Simple unique ID
+                name: nameInput.value.trim(),
+                email: emailInput.value.trim(),
+                phone: phoneInput.value.trim(),
+                lastConversation: new Date(lastConversationInput.value),
+                dealValue: parseFloat(dealValueInput.value) || 0,
+                notes: notesInput.value.trim(),
+                tags: tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
+                nextFollowUp: null // Initially no follow-up set
+            };
+
+            // Check if editing an existing contact
+            const existingContactIndex = contacts.findIndex(c => c.id === contactForm.dataset.editingId);
+            if (existingContactIndex > -1) {
+                // Update existing contact
+                newContact.id = contactForm.dataset.editingId; // Keep original ID
+                newContact.nextFollowUp = contacts[existingContactIndex].nextFollowUp; // Keep existing follow-up date
+                contacts[existingContactIndex] = newContact;
+                showMessageBox('Contact Updated', `${newContact.name} has been updated successfully.`);
+                delete contactForm.dataset.editingId; // Clear editing state
+                contactForm.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save mr-2"></i>Add Contact';
+            } else {
+                // Add new contact
+                contacts.push(newContact);
+                showMessageBox('Contact Added', `${newContact.name} has been added to your CRM.`);
+            }
+
+            saveContacts();
+            renderContacts();
+            contactForm.reset(); // Clear form
+            dealValueInput.value = '0'; // Reset deal value to 0
+        });
+
+        // Edit Contact
+        function editContact(id) {
+            const contactToEdit = contacts.find(contact => contact.id === id);
+            if (contactToEdit) {
+                nameInput.value = contactToEdit.name;
+                emailInput.value = contactToEdit.email;
+                phoneInput.value = contactToEdit.phone;
+                lastConversationInput.value = contactToEdit.lastConversation.toISOString().split('T')[0]; // Format for date input
+                dealValueInput.value = contactToEdit.dealValue;
+                tagsInput.value = contactToEdit.tags.join(', ');
+                notesInput.value = contactToEdit.notes;
+
+                // Set a data attribute to indicate we are editing
+                contactForm.dataset.editingId = id;
+                contactForm.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Update Contact';
+
+                // Scroll to form
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Delete Contact
+        async function deleteContact(id) {
+            const contactToDelete = contacts.find(contact => contact.id === id);
+            if (!contactToDelete) return;
+
+            const confirmed = await showMessageBox('Confirm Deletion', `Are you sure you want to delete ${contactToDelete.name}? This action cannot be undone.`, 'confirm');
+
+            if (confirmed) {
+                contacts = contacts.filter(contact => contact.id !== id);
+                saveContacts();
+                renderContacts();
+                showMessageBox('Contact Deleted', `${contactToDelete.name} has been removed.`);
+            }
+        }
+
+        // Set Follow-up Date
+        async function setFollowUp(id) {
+            const contact = contacts.find(c => c.id === id);
+            if (!contact) return;
+
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.className = 'w-full p-2 border border-gray-300 rounded-md mb-3';
+            if (contact.nextFollowUp) {
+                dateInput.value = contact.nextFollowUp.toISOString().split('T')[0];
+            }
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = `
+                <p class="mb-3">Set next follow-up date for <span class="font-bold text-indigo-600">${contact.name}</span>:</p>
+            `;
+            tempDiv.appendChild(dateInput);
+
+            // Use the message box as a custom prompt
+            const result = await new Promise(resolve => {
+                messageBoxTitle.textContent = 'Set Follow-up Date';
+                messageBoxText.innerHTML = ''; // Clear existing text
+                messageBoxText.appendChild(tempDiv); // Append the date input
+
+                messageBoxConfirmBtn.classList.remove('hidden');
+                messageBoxCancelBtn.classList.remove('hidden');
+                messageBoxOKBtn.classList.add('hidden'); // Hide OK button
+
+                messageBoxConfirmBtn.textContent = 'Set Date';
+                messageBoxConfirmBtn.onclick = () => {
+                    messageBox.classList.add('hidden');
+                    messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                    messageBoxContent.classList.add('scale-95', 'opacity-0');
+                    resolve(dateInput.value);
+                };
+                messageBoxCancelBtn.onclick = () => {
+                    messageBox.classList.add('hidden');
+                    messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                    messageBoxContent.classList.add('scale-95', 'opacity-0');
+                    resolve(null); // User cancelled
+                };
+
+                messageBox.classList.remove('hidden');
+                setTimeout(() => {
+                    messageBoxContent.classList.remove('scale-95', 'opacity-0');
+                    messageBoxContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            });
+
+            if (result) {
+                contact.nextFollowUp = new Date(result);
+                saveContacts();
+                renderContacts();
+                showMessageBox('Follow-up Set', `Follow-up for ${contact.name} set for ${new Date(result).toLocaleDateString()}.`);
+            } else {
+                showMessageBox('Follow-up Cancelled', 'Follow-up date setting cancelled.');
+            }
+        }
+
+        // Check for upcoming reminders
+        function checkReminders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+            const upcomingReminders = contacts.filter(contact => {
+                if (!contact.nextFollowUp) return false;
+                const followUpDate = new Date(contact.nextFollowUp);
+                followUpDate.setHours(0, 0, 0, 0);
+                // Check if follow-up date is today or in the past
+                return followUpDate <= today;
+            });
+
+            if (upcomingReminders.length > 0) {
+                reminderListDiv.innerHTML = ''; // Clear previous reminders
+                upcomingReminders.forEach(contact => {
+                    const reminderItem = document.createElement('div');
+                    reminderItem.className = 'bg-indigo-50 p-3 rounded-md mb-3 flex items-center justify-between border border-indigo-200';
+                    reminderItem.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-indigo-800">${contact.name}</p>
+                            <p class="text-sm text-gray-700">Follow-up due: <span class="font-medium">${contact.nextFollowUp.toLocaleDateString()}</span></p>
+                        </div>
+                        <button class="mark-done-btn bg-indigo-200 hover:bg-indigo-300 text-indigo-800 text-xs py-1 px-3 rounded-full" data-id="${contact.id}">Done</button>
+                    `;
+                    reminderListDiv.appendChild(reminderItem);
+                });
+
+                // Add event listeners for 'Done' buttons
+                document.querySelectorAll('.mark-done-btn').forEach(button => {
+                    button.onclick = (e) => {
+                        const id = e.target.dataset.id;
+                        const contactIndex = contacts.findIndex(c => c.id === id);
+                        if (contactIndex > -1) {
+                            contacts[contactIndex].nextFollowUp = null; // Mark as done by clearing date
+                            saveContacts();
+                            checkReminders(); // Re-check and re-render reminders
+                            renderContacts(); // Re-render main contact list
+                            showMessageBox('Reminder Cleared', `Follow-up for ${contacts[contactIndex].name} marked as done.`);
+                        }
+                    };
+                });
+
+                // Show the modal
+                reminderModal.classList.remove('hidden');
+                setTimeout(() => {
+                    reminderModalContent.classList.remove('scale-95', 'opacity-0');
+                    reminderModalContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            } else {
+                reminderModal.classList.add('hidden');
+                reminderModalContent.classList.remove('scale-100', 'opacity-100');
+                reminderModalContent.classList.add('scale-95', 'opacity-0');
+            }
+        }
+
+        // Close Reminder Modal
+        closeReminderModalBtn.addEventListener('click', () => {
+            reminderModal.classList.add('hidden');
+            reminderModalContent.classList.remove('scale-100', 'opacity-100');
+            reminderModalContent.classList.add('scale-95', 'opacity-0');
+        });
+
+        // Mark All Reminders Done
+        markAllRemindersDoneBtn.addEventListener('click', async () => {
+            const confirmed = await showMessageBox('Confirm All Done', 'Are you sure you want to mark all pending follow-ups as done?', 'confirm');
+            if (confirmed) {
+                contacts.forEach(contact => {
+                    if (contact.nextFollowUp && new Date(contact.nextFollowUp).setHours(0,0,0,0) <= new Date().setHours(0,0,0,0)) {
+                        contact.nextFollowUp = null;
+                    }
+                });
+                saveContacts();
+                checkReminders(); // Close modal if no more reminders
+                renderContacts();
+                showMessageBox('All Reminders Cleared', 'All pending follow-ups have been marked as done.');
+            }
+        });
+
+        // Event listeners for sorting and searching
+        sortBySelect.addEventListener('change', renderContacts);
+        searchInput.addEventListener('input', renderContacts);
+
+        // Initial load and render
+        window.onload = () => {
+            loadContacts();
+            renderContacts();
+            checkReminders(); // Check for reminders on load
+        };
+    </script>
+</body>
+</html>
